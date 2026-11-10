@@ -1,4 +1,2 @@
-# Ignorar archivos con credenciales y ejecutables compilados
+# Ignorar únicamente el archivo de credenciales privadas
 .env
-*.exe
-

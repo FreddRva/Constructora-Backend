@@ -6,12 +6,10 @@ import (
 	"strings"
 )
 
-// ItemCreator define la interfaz del patrón Factory Method para crear recursos.
 type ItemCreator interface {
 	Create(input model.Item) (*model.Item, error)
 }
 
-// MaterialCreator crea objetos de tipo MATERIAL (consumibles de obra).
 type MaterialCreator struct{}
 
 func (c *MaterialCreator) Create(input model.Item) (*model.Item, error) {
@@ -24,13 +22,12 @@ func (c *MaterialCreator) Create(input model.Item) (*model.Item, error) {
 		Category:  model.CategoryMaterial,
 		Unit:      unit,
 		Stock:     input.Stock,
-		Condition: "Consumible", // Un material siempre se consume en obra
+		Condition: "Consumible",
 		ProjectID: input.ProjectID,
 		ImageURL:  strings.TrimSpace(input.ImageURL),
 	}, nil
 }
 
-// ToolCreator crea objetos de tipo HERRAMIENTA (activos reutilizables).
 type ToolCreator struct{}
 
 func (c *ToolCreator) Create(input model.Item) (*model.Item, error) {
@@ -41,7 +38,7 @@ func (c *ToolCreator) Create(input model.Item) (*model.Item, error) {
 	return &model.Item{
 		Name:      strings.TrimSpace(input.Name),
 		Category:  model.CategoryTool,
-		Unit:      "Unidad", // Las herramientas se cuentan por unidad física
+		Unit:      "Unidad",
 		Stock:     input.Stock,
 		Condition: condition,
 		ProjectID: input.ProjectID,
@@ -49,7 +46,6 @@ func (c *ToolCreator) Create(input model.Item) (*model.Item, error) {
 	}, nil
 }
 
-// CreateInventoryItem es el Factory Method centralizado que selecciona el creador adecuado.
 func CreateInventoryItem(input model.Item) (*model.Item, error) {
 	if strings.TrimSpace(input.Name) == "" {
 		return nil, errors.New("el nombre del recurso es obligatorio")
@@ -70,4 +66,3 @@ func CreateInventoryItem(input model.Item) (*model.Item, error) {
 
 	return creator.Create(input)
 }
-
