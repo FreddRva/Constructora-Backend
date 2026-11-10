@@ -1,0 +1,55 @@
+# Docker Compose conectado directamente a tu instancia Amazon RDS (constructora-db)
+# Uso: docker compose -f docker-compose.aws.yml up -d --build
+services:
+  proyectos-service:
+    build: ./services/proyectos-service
+    container_name: proyectos-service
+    restart: always
+    environment:
+      PORT: "8081"
+      DB_URL: "postgres://postgres:Constructora2026@constructora-db.cab8ecee8zdw.us-east-1.rds.amazonaws.com:5432/projects_db?sslmode=require"
+    ports:
+      - "8081:8081"
+
+  inventario-service:
+    build: ./services/inventario-service
+    container_name: inventario-service
+    restart: always
+    environment:
+      PORT: "8082"
+      DB_URL: "postgres://postgres:Constructora2026@constructora-db.cab8ecee8zdw.us-east-1.rds.amazonaws.com:5432/inventory_db?sslmode=require"
+    ports:
+      - "8082:8082"
+
+  presupuestos-service:
+    build: ./services/presupuestos-service
+    container_name: presupuestos-service
+    restart: always
+    environment:
+      PORT: "8083"
+      DB_URL: "postgres://postgres:Constructora2026@constructora-db.cab8ecee8zdw.us-east-1.rds.amazonaws.com:5432/budgets_db?sslmode=require"
+      PROJECT_SERVICE_URL: "http://proyectos-service:8081"
+    ports:
+      - "8083:8083"
+    depends_on:
+      - proyectos-service
+
+  personal-service:
+    build: ./services/personal-service
+    container_name: personal-service
+    restart: always
+    environment:
+      PORT: "8084"
+      DB_URL: "postgres://postgres:Constructora2026@constructora-db.cab8ecee8zdw.us-east-1.rds.amazonaws.com:5432/staff_db?sslmode=require"
+    ports:
+      - "8084:8084"
+
+  compras-service:
+    build: ./services/compras-service
+    container_name: compras-service
+    restart: always
+    environment:
+      PORT: "8085"
+      DB_URL: "postgres://postgres:Constructora2026@constructora-db.cab8ecee8zdw.us-east-1.rds.amazonaws.com:5432/procurement_db?sslmode=require"
+    ports:
+      - "8085:8085"

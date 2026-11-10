@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: constructora-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  proyectos-service:
+    build: ./services/proyectos-service
+    container_name: proyectos-service
+    environment:
+      PORT: "8081"
+      DB_URL: "postgres://postgres:postgres@postgres:5432/projects_db?sslmode=disable"
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  inventario-service:
+    build: ./services/inventario-service
+    container_name: inventario-service
+    environment:
+      PORT: "8082"
+      DB_URL: "postgres://postgres:postgres@postgres:5432/inventory_db?sslmode=disable"
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  presupuestos-service:
+    build: ./services/presupuestos-service
+    container_name: presupuestos-service
+    environment:
+      PORT: "8083"
+      DB_URL: "postgres://postgres:postgres@postgres:5432/budgets_db?sslmode=disable"
+      PROJECT_SERVICE_URL: "http://proyectos-service:8081"
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  personal-service:
+    build: ./services/personal-service
+    container_name: personal-service
+    environment:
+      PORT: "8084"
+      DB_URL: "postgres://postgres:postgres@postgres:5432/staff_db?sslmode=disable"
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  compras-service:
+    build: ./services/compras-service
+    container_name: compras-service
+    environment:
+      PORT: "8085"
+      DB_URL: "postgres://postgres:postgres@postgres:5432/procurement_db?sslmode=disable"
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
